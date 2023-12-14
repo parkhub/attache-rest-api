@@ -1,0 +1,14 @@
+// tsconfig
+{
+  "compilerOptions": {
+    "target": "ES2016",
+    "module": "CommonJS",
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "strict": true,
+    "esModuleInterop": true,
+    "moduleResolution": "Node",
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"]
+}
