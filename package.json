@@ -18,7 +18,7 @@
   "modules": "dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "populate_secrets": ". scripts/populate-secrets.sh",
+    "populate_secrets": "source ./scripts/secrets.sh",
     "build": "tsc"
   },
   "author": "",

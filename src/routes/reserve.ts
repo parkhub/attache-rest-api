@@ -45,7 +45,7 @@ router.post('/event', async (req: PostReservationRequest, res: Response) => {
     }
 
     try {
-        const dbCredentials = JSON.parse(process.env.DB_CREDENTIALS as string) as DbClient;
+        const dbCredentials = JSON.parse(process.env.DB as string) as DbClient;
         //todo add for other gate validations as they get built
         const tibaCredentials = JSON.parse(process.env.TIBA_CREDENTIALS as string) as VendorCredentials;
         const config = {
