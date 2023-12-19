@@ -8,14 +8,14 @@ WORKDIR /usr/src/app
 # Copy package.json and package-lock.json (or yarn.lock)
 COPY package*.json ./
 
-# Copy the scripts directory
-COPY scripts/* ./scripts/
+# uncomment for local deployment
+# COPY scripts/* ./scripts/
 
-# Make the secrets script executable
-RUN chmod +x scripts/secrets.sh
+# uncomment for local deployment
+# RUN chmod +x scripts/secrets.sh
 
-# Run the secrets script
-RUN npm run populate_secrets
+# uncomment for local deployment
+# RUN npm run populate_secrets
 # Install dependencies
 RUN --mount=type=secret,id=npmrc,target=/root/.npmrc npm install
 
