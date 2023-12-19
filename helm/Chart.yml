@@ -1,7 +1,7 @@
 apiVersion: v1
-description: Smartpass REST API
-name: smartpass-api
+description: Attache REST API
+name: attache-rest-api
 version: 0.2.0
 maintainers:
-    - name: Logan Fisher
-      email: logan@themediaside.com
+    - name: Amanda Kunz
+      email: amanda.kunz@parkhub.com
