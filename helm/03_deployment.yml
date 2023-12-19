@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{.Values.name}}
+  namespace: {{.Values.namespace}}
+  labels:
+    type: api
+    app: {{ .Values.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{.Values.name}}
+      type: {{.Values.type}}
+  template:
+    metadata:
+      labels:
+        app: {{.Values.name}}
+        type: {{.Values.type}}
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - {{.Values.name}}
+            topologyKey: "kubernetes.io/hostname"
+      containers:
+        - image: {{.Values.image}}:{{.Values.version}}
+          name: {{.Values.name}}
+          imagePullPolicy: Always
+          envFrom:
+            - secretRef:
+                name: {{.Values.name}}
+          ports:
+            - name: {{.Values.port_name}}
+              containerPort: {{.Values.port}}
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "1"

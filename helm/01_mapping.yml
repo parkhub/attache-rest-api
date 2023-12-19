@@ -1,0 +1,18 @@
+apiVersion: getambassador.io/v2
+kind: Mapping
+metadata:
+  name: post-attache-reserve-event
+spec:
+  method: POST
+  prefix: /api/v1/attache/reserve/event
+  rewrite: /api/reserve/event
+  service: {{.Values.name}}.{{.Values.namespace}}:{{.Values.port}}
+  timeout_ms: 1000000
+  cors:
+    origins:
+      {{- range (splitList "|" .Values.cors) }}
+        - {{.}}
+      {{- end }}
+    methods: POST
+    credentials: true
+    headers: {{.Values.headers}}
