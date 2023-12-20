@@ -1,0 +1,20 @@
+version: '3'
+
+volumes:
+  server_node_modules:
+
+services:
+  # LOCAL ENV BUILD
+  attache-rest-api:
+    build:
+      context: ./
+      args:
+        - LOCAL_DEPLOYMENT=true
+        - NPM_TOKEN
+      dockerfile: Dockerfile
+    command: ./node_modules/.bin/nodemon --exec node .
+    volumes:
+      - ./:/home/app
+      - server_node_modules:/home/app/node_modules
+    ports:
+      - "3000:3000"

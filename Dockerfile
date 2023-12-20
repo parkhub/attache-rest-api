@@ -1,29 +1,25 @@
 # Use a Node.js base image with TypeScript already installed
 FROM node:18-alpine as builder
 
+ARG LOCAL_DEPLOYMENT=false
+
+COPY scripts/* ./scripts/
+
+RUN chmod +x scripts/setup.sh
+
+ARG NPM_TOKEN
 
 # Set the working directory in the container
-WORKDIR /usr/src/app
+WORKDIR /home/app
 
+COPY .npmrc .npmrc
 # Copy package.json and package-lock.json (or yarn.lock)
 COPY package*.json ./
-
-# uncomment for local deployment
-# COPY scripts/* ./scripts/
-
-# uncomment for local deployment
-# RUN chmod +x scripts/secrets.sh
-
-# uncomment for local deployment
-# RUN npm run populate_secrets
-# Install dependencies
-RUN --mount=type=secret,id=npmrc,target=/root/.npmrc npm install
-
+# Install dependencies and remove .npmrc
+RUN npm install && rm -f .npmrc
 # Copy the rest of the application
 COPY . .
-
 # Compile TypeScript to JavaScript
 RUN npm run build
-
 # Define the command to run your app using CMD which defines your runtime
-CMD ["node", "dist/index.js"]
+CMD ["npm", "start"]

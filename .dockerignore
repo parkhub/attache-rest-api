@@ -1,0 +1,13 @@
+.git
+.gitignore
+.vscode
+.env
+.DS_Store
+*.md
+*.dump
+Dockerfile
+coverage
+node_modules
+npm-debug.log
+codefresh.yml
+docker-compose.yml

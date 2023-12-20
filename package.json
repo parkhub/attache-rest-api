@@ -5,7 +5,8 @@
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
     "express": "^4.18.2",
-    "lodash": "^4.17.21"
+    "lodash": "^4.17.21",
+    "nodemon": "^3.0.2"
   },
   "devDependencies": {
     "@types/express": "^4.17.21",
@@ -19,9 +20,16 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "populate_secrets": "source ./scripts/secrets.sh",
-    "build": "tsc"
+    "build": "tsc",
+    "start": "./node_modules/.bin/nodemon --exec node .",
+    "compose_up": "npm run populate_secrets && docker-compose up attache-rest-api",
+    "compose_run": "docker-compose run attache-rest-api",
+    "compose_down": "docker-compose down",
+    "clean_dist": "rm -rf dist",
+    "clean_docker": "docker-compose down --rmi all -v",
+    "clean": "npm run clean_dist && npm run clean_docker"
   },
-  "author": "",
+  "author": "Amanda Kunz",
   "license": "ISC",
   "description": ""
 }
