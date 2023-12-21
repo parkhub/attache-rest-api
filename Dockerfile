@@ -3,11 +3,11 @@ FROM node:18-alpine as builder
 
 ARG LOCAL_DEPLOYMENT=false
 
-
 ARG NPM_TOKEN
 
-# Set the working directory in the container
 WORKDIR /home/app
+
+COPY helm-charts/ ./helm-charts/
 
 COPY scripts/* ./scripts/
 
