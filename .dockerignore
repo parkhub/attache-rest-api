@@ -11,3 +11,5 @@ node_modules
 npm-debug.log
 codefresh.yml
 docker-compose.yml
+/scripts/compose.sh
+run_local.sh

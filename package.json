@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "@aws-sdk/client-secrets-manager": "^3.470.0",
-    "@parkhub/attache": "^1.0.27",
+    "@parkhub/attache": "^1.0.29",
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
     "express": "^4.18.2",
@@ -19,15 +19,17 @@
   "modules": "dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "populate_secrets": "source ./scripts/secrets.sh",
     "build": "tsc",
     "start": "./node_modules/.bin/nodemon --exec node .",
-    "compose_up": "npm run populate_secrets && docker-compose up attache-rest-api",
-    "compose_run": "docker-compose run attache-rest-api",
-    "compose_down": "docker-compose down",
-    "clean_dist": "rm -rf dist",
-    "clean_docker": "docker-compose down --rmi all -v",
-    "clean": "npm run clean_dist && npm run clean_docker"
+    "set-env-local": "export NODE_ENV=local && . ./scripts/secrets.sh",
+    "compose-up-local": "./scripts/compose.sh",
+    "compose-run": "docker-compose run attache-rest-api",
+    "compose-down": "docker-compose down",
+    "compose-down-v": "docker-compose down -v",
+    "compose-down-rmi": "docker-compose down --rmi all",
+    "clean-dist": "rm -rf dist",
+    "clean-docker": "docker-compose down --rmi all -v",
+    "clean": "npm run clean-dist && npm run clean-docker"
   },
   "author": "Amanda Kunz",
   "license": "ISC",

@@ -3,14 +3,15 @@ FROM node:18-alpine as builder
 
 ARG LOCAL_DEPLOYMENT=false
 
-COPY scripts/* ./scripts/
-
-RUN chmod +x scripts/setup.sh
 
 ARG NPM_TOKEN
 
 # Set the working directory in the container
 WORKDIR /home/app
+
+COPY scripts/* ./scripts/
+
+RUN chmod +x scripts/setup.sh
 
 COPY .npmrc .npmrc
 # Copy package.json and package-lock.json (or yarn.lock)
