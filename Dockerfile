@@ -7,7 +7,7 @@ ARG NPM_TOKEN
 
 WORKDIR /home/app
 
-COPY helm-charts/ ./helm-charts/
+COPY helm/ ./helm/
 
 COPY scripts/* ./scripts/
 
