@@ -1,0 +1,16 @@
+# Main #
+name: attache-rest-api
+namespace: "platform"
+type: api
+port: 3000
+port_name: http
+min_replicas: 1
+max_replicas: 3
+
+# Image #
+image: 295603111667.dkr.ecr.us-east-1.amazonaws.com/attache-rest-api
+version: develop
+secretmgr: develop/attache-api
+signal: develop/signal
+cors: https://suite.develop.parkhub.com
+headers: Content-Type,Access-Control-Allow-Origin,Access-Control-Allow-Headers,Access-Control-Expose-Headers,Origin,Authorization
