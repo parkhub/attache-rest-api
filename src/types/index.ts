@@ -1,5 +1,5 @@
 'use strict'
 
-import * as eventPassTypes from './eventPass';
+import * as eventPassTypes from './reserve';
 
 export { eventPassTypes };

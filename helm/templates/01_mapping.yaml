@@ -4,8 +4,8 @@ metadata:
   name: post-attache-reserve-event
 spec:
   method: POST
-  prefix: /api/v1/attache/reserve/event
-  rewrite: /api/reserve/event
+  prefix: /api/v1/attache/reserve
+  rewrite: /api/reserve
   service: {{.Values.name}}.{{.Values.namespace}}:{{.Values.port}}
   timeout_ms: 1000000
   cors:
@@ -14,5 +14,31 @@ spec:
         - {{.}}
       {{- end }}
     methods: POST
+    credentials: true
+    headers: {{.Values.headers}}
+  method: PUT
+  prefix: /api/v1/attache/reserve
+  rewrite: /api/reserve
+  service: {{.Values.name}}.{{.Values.namespace}}:{{.Values.port}}
+  timeout_ms: 1000000
+  cors:
+    origins:
+      {{- range (splitList "|" .Values.cors) }}
+        - {{.}}
+      {{- end }}
+    methods: PUT
+    credentials: true
+    headers: {{.Values.headers}}
+  method: DELETE
+  prefix: /api/v1/attache/reserve
+  rewrite: /api/reserve
+  service: {{.Values.name}}.{{.Values.namespace}}:{{.Values.port}}
+  timeout_ms: 1000000
+  cors:
+    origins:
+      {{- range (splitList "|" .Values.cors) }}
+        - {{.}}
+      {{- end }}
+    methods: DELETE
     credentials: true
     headers: {{.Values.headers}}

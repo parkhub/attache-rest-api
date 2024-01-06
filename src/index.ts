@@ -7,12 +7,12 @@ import router from './routes';
 import basicAuth from './authorizer';
 
 const app = express();
-const port = process.env.PORT;
+const port = process.env.PORT || 3000;
 
 app.use(bodyParser.json());
 app.use(basicAuth);
 app.use('/api', router);
 
 app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
+	console.log(`Server running on port ${port}`);
 });
