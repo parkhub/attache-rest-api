@@ -1,7 +1,7 @@
 #!/bin/bash
 
 COMMAND=$1
-RUN=$2
+RUN=$3
 NODE_ENV="local"
 export LOCAL_DEPLOYMENT="true"
 
