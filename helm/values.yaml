@@ -1,5 +1,5 @@
 # Main #
-name: attache-rest-api
+name: attache
 namespace: "platform"
 type: api
 port: 3000
@@ -8,7 +8,7 @@ min_replicas: 1
 max_replicas: 3
 
 # Image #
-image: 295603111667.dkr.ecr.us-east-1.amazonaws.com/attache-rest-api
+image: 295603111667.dkr.ecr.us-east-1.amazonaws.com/attache
 version: develop
 secretmgr: develop/attache-api
 signal: develop/signal

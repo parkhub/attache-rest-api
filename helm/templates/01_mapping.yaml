@@ -1,7 +1,7 @@
 apiVersion: getambassador.io/v2
 kind: Mapping
 metadata:
-  name: post-attache-reserve-event
+  name: attache-reserve
 spec:
   method: POST
   prefix: /api/v1/attache/reserve
