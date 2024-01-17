@@ -1,7 +1,7 @@
 apiVersion: getambassador.io/v2
 kind: Mapping
 metadata:
-  name: attache-reserve
+  name: post-attache-reserve
 spec:
   method: POST
   prefix: /api/v1/attache/reserve
@@ -16,6 +16,12 @@ spec:
     methods: POST
     credentials: true
     headers: {{.Values.headers}}
+---    
+apiVersion: getambassador.io/v2   
+kind: Mapping
+metadata:
+  name: put-attache-reserve
+spec: 
   method: PUT
   prefix: /api/v1/attache/reserve
   rewrite: /api/reserve
@@ -29,6 +35,12 @@ spec:
     methods: PUT
     credentials: true
     headers: {{.Values.headers}}
+---    
+apiVersion: getambassador.io/v2   
+kind: Mapping
+metadata:
+  name: delete-attache-reserve
+spec: 
   method: DELETE
   prefix: /api/v1/attache/reserve
   rewrite: /api/reserve
