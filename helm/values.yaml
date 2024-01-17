@@ -1,5 +1,5 @@
 # Main #
-name: attache
+name: attache-rest-api
 namespace: "platform"
 type: api
 port: 3000
