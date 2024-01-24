@@ -1,12 +1,11 @@
 'use strict';
 import { Request } from 'express';
-
 export interface ReservationRequestBody {
         landmarkId: string;
         lotId: string;
         eventId?: string;
         operatorId?: string;
-        transactionId: string;
+        transactionId?: string;
         licensePlate?: string;
 }
 
@@ -47,11 +46,36 @@ export enum Result {
     cancelled = 'cancelled',
     updated = 'updated'
 }
-
-// export interface AttacheReserveResponse {
-//         result: Result;
-//         message?: string;
-//         barcode?: { text: string, type: string };
-//         reject: boolean;
-// }
+export interface ExternalSourcesLandmarkSchema {
+    id?: string | null;
+    name?: string | null;
+    slug?: string | null;
+    versionNumber?: string | null;
+    lastPing?: string | null;
+    landmarkId: string;
+    externalSourceId: string;
+    tagId?: string | null;
+    venueCode?: string | null;
+    enabled?: boolean | null;
+    createdAt?: string | null;
+    updatedAt?: string | null;
+    source?: string | null;
+  }
+export interface ReserveResponse {
+        result: Result;
+        message?: string;
+        barcode?: { text: string, type: string };
+        esl?: ExternalSourcesLandmarkSchema;
+        reject: boolean;
+        reservation?: {
+                code?: string;
+                description?: string;
+                orderId?: string;
+                confirmationCode?: string;
+                barcode?: { text: string, type: string };
+                startsAt?: string;
+                expiresAt?: string;
+        };
+        externalTransactionId?: {id:string}
+}
 

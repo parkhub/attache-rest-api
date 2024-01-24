@@ -54,3 +54,41 @@ spec:
     methods: DELETE
     credentials: true
     headers: {{.Values.headers}}
+---
+apiVersion: getambassador.io/v2   
+kind: Mapping
+metadata:
+  name: delete-attache-reserve-smartpass
+spec: 
+  method: DELETE
+  prefix: /api/v1/attache/reserve/smartpass
+  rewrite: /api/reserve
+  service: {{.Values.name}}.{{.Values.namespace}}:{{.Values.port}}
+  timeout_ms: 1000000
+  cors:
+    origins:
+      {{- range (splitList "|" .Values.cors) }}
+        - {{.}}
+      {{- end }}
+    methods: DELETE
+    credentials: true
+    headers: {{.Values.headers}}
+---
+apiVersion: getambassador.io/v2
+kind: Mapping
+metadata:
+  name: post-attache-reserve
+spec:
+  method: POST
+  prefix: /api/v1/attache/reserve/smartpass
+  rewrite: /api/reserve
+  service: {{.Values.name}}.{{.Values.namespace}}:{{.Values.port}}
+  timeout_ms: 1000000
+  cors:
+    origins:
+      {{- range (splitList "|" .Values.cors) }}
+        - {{.}}
+      {{- end }}
+    methods: POST
+    credentials: true
+    headers: {{.Values.headers}}

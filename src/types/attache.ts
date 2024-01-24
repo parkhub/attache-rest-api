@@ -1,7 +1,4 @@
-'use strict'
-
-import { Knex } from "knex";
-import { createInterface } from "node:readline/promises";
+'use strict';
 
 export interface DbClient {
   host: string;
@@ -9,7 +6,7 @@ export interface DbClient {
   user: string;
   password: string;
   database: string;
-};
+}
 
 export interface VendorCredentials {
   tiba?: {
@@ -25,3 +22,52 @@ export interface UserConfig {
     vendorCredentials?: VendorCredentials,
     coreAesSecret?: string;
   }
+
+export enum Source {
+    axs = 'axs',
+    seatgeek = 'seatgeek',
+    ticketmaster = 'ticketmaster',
+    tiba = 'tiba'
+  }
+
+export interface ExternalDataSchema {
+  barcode?: string | null;
+  eventName?: string | null;
+  eventDate?: string | null;
+  eventTime?: string | null;
+  source?: Source | null;
+  sectionName?: string | null;
+  cancelled?: boolean | null;
+  cancellationReason?: string | null;
+  externalSourcesLandmarkId?: string | null;
+  rainedOut?: boolean | null;
+  orphaned?: boolean | null;
+  orderId?: string | null;
+}
+
+export interface ExternalTransactionSchema {
+  id?: string | null;
+  orderId?: string | null;
+  externalData?: ExternalDataSchema;
+  createdAt?: string | null;
+  updatedAt: string;
+  transactionId: string;
+  sourceId: string;
+  externalEventId?: string | null;
+  eventId?: string | null;
+  lotId?: string | null;
+  barcode?: string | null;
+  redeemed: boolean;
+  source: Source;
+  customerName?: string | null;
+  acctId?: string | null;
+  cancelled: boolean;
+  cancellationReason?: string | null;
+  reported: boolean;
+  hold?: string | null;
+  passId: number;
+  listingId?: string | null;
+  transient: boolean;
+  uniqueBarcodeEventFlag: boolean;
+  externalSourcesLandmarkId?: string | null;
+}

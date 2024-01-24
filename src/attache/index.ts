@@ -1,6 +1,6 @@
 'use strict';
 
-import {attache} from '@parkhub/attache';
+import {attache, data} from '@parkhub/attache';
 import { DbClient, UserConfig, VendorCredentials } from '../types/attache';
 
 const generateConfig = (): UserConfig => {
@@ -14,3 +14,4 @@ const generateConfig = (): UserConfig => {
 };
 
 export const attacheClient = () => attache(generateConfig());
+export const dataClient = () => data(generateConfig());
