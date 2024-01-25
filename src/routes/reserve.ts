@@ -10,8 +10,6 @@ import {
 } from '../types/reserve';
 import {validateRequired, validateOptional, validateCreateOrChange, validatePost, validatePut, validateDelete} from './reserve/validate';
 import { postHandler } from './reserve/handlers';
-import { Source } from '../types/attache';
-
 const router = Router();
 
 
@@ -153,7 +151,7 @@ router.delete('/smartpass', async (req: DeleteReservationRequest, res) => {
 	}
 	try {
 		const {eventId, lotId, barcode} = pass;
-		const externalTransaction = await dataClient().externalTransaction({eventId, lotId, barcode, redeemed: false, source: Source.tiba}).fetchOne();
+		const externalTransaction = await dataClient().externalTransaction({eventId, lotId, barcode, redeemed: false}).fetchOne();
 		if (!externalTransaction) throw new Error('No external transaction found');
 		console.log(externalTransaction);
 		const response = await attacheClient()
