@@ -75,6 +75,7 @@ export interface ReserveResponse {
                 barcode?: { text: string, type: string };
                 startsAt?: string;
                 expiresAt?: string;
+                facilityCode?: string;
         };
         externalTransactionId?: {id:string}
 }

@@ -10,8 +10,8 @@ import {
 } from '../types/reserve';
 import {validateRequired, validateOptional, validateCreateOrChange, validatePost, validatePut, validateDelete} from './reserve/validate';
 import { postHandler } from './reserve/handlers';
+import { Source } from '../types/attache';
 const router = Router();
-
 
 router.post('/', async (req: PostReservationRequest, res: Response) => {
 	const pass = req.body;
@@ -23,8 +23,7 @@ router.post('/', async (req: PostReservationRequest, res: Response) => {
 		validatePost(pass);
 	} catch (err) {
 		const error = err as Error;
-		res
-			.status(400)
+		res.status(400)
 			.json({ result: 'invalid', message: error.message, reject: true });
 		return;
 	}
@@ -39,6 +38,7 @@ router.post('/', async (req: PostReservationRequest, res: Response) => {
 	} catch (err) {
 		console.error(err); //TODO change to signal logger
 		res.status(500).json({result: 'failed', reject: true, message: 'Internal Server Error'});
+		return;
 	}
 });
 
@@ -56,6 +56,7 @@ router.put('/', async (req: PutReservationRequest, res: Response) => {
 			message: (err as Error).message,
 			reject: true,
 		});
+		return;
 	}
 	try {
 		const response = await attacheClient()
@@ -65,11 +66,13 @@ router.put('/', async (req: PutReservationRequest, res: Response) => {
 
 		if (response.result !== 'updated' && response.reject) {
 			res.status(400).send(JSON.stringify(response, null, 4));
+			return;
 		}
 		res.status(200).json(response);
 	} catch (err) {
 		console.error(err); //TODO change to signal logger
 		res.status(500).json({result: 'failed', reject: true, message: 'Internal Server Error'});
+		return;
 	}
 });
 
@@ -86,6 +89,7 @@ router.delete('/', async (req: DeleteReservationRequest, res: Response) => {
 			message: (err as Error).message,
 			reject: true,
 		});
+		return;
 	}
 	try {
 		const response = await attacheClient()
@@ -101,6 +105,7 @@ router.delete('/', async (req: DeleteReservationRequest, res: Response) => {
 	} catch (err) {
 		console.error(err); //TODO change to signal logger
 		res.status(500).json({result: 'failed', reject: true, message: 'Internal Server Error'});
+		return;
 	}
 });
 
@@ -132,6 +137,7 @@ router.post('/smartpass', async (req: PostReservationRequest, res: Response) => 
 	} catch (err) {
 		console.error(err); //TODO change to signal logger
 		res.status(500).json({result: 'failed', reject: true, message: 'Internal Server Error'});
+		return;
 	}
 });
 
@@ -148,21 +154,23 @@ router.delete('/smartpass', async (req: DeleteReservationRequest, res) => {
 			message: (err as Error).message,
 			reject: true,
 		});
+		return;
 	}
 	try {
 		const {eventId, lotId, barcode} = pass;
-		const externalTransaction = await dataClient().externalTransaction({eventId, lotId, barcode, redeemed: false}).fetchOne();
-		if (!externalTransaction) throw new Error('No external transaction found');
-		console.log(externalTransaction);
+		const externalTransaction = await dataClient().externalTransaction({eventId, lotId, barcode, redeemed: false, externalData:{source: Source.tiba}}).fetchOne();
+		
+		if (!externalTransaction) return res.status(400).json('no external transaction found');
+	
 		const response = await attacheClient()
 			.reserve()
 			.handler({ pass, externalTransaction })
 			.cancel() as ReserveResponse;		
 		delete response.reservation?.code;
 		delete response.reservation?.description;
-
 		const {id} = externalTransaction;
-		await dataClient().externalTransaction({cancelled: true, cancellationReason: 'transfer', id}).updateOne();
+		await dataClient().externalTransaction({id, externalData: {source: Source.tiba}}, undefined, {cancelled: true, cancellationReason: 'transfer'}).updateOne();
+
 		if (response.result !== 'cancelled' && response.reject) {
 			res.status(400).json(response);
 		}
@@ -170,6 +178,7 @@ router.delete('/smartpass', async (req: DeleteReservationRequest, res) => {
 	} catch (err) {
 		console.error(err); //TODO change to signal logger
 		res.status(500).json({result: 'failed', reject: true, message: 'Internal Server Error'});
+		return;
 	}
 });
 export default router;

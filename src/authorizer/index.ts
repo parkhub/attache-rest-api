@@ -28,8 +28,6 @@ const basicAuth = (req: Request, res: Response, next: NextFunction) => {
 		}
 	}
 
-	// Authentication failed
-	res.setHeader('WWW-Authenticate', 'Basic');
 	return res.status(401).json({ message: 'Authentication failed' });
 };
 
