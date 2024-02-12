@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ "$NODE_ENV" = "local" ]; then
-    NODE_ENV="qa"
+    NODE_ENV="develop"
 fi
 
 # Fetch and process env.NODE_ENV/attache-rest-apps for individual key/value pairs
