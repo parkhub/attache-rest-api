@@ -117,6 +117,7 @@ router.post('/smartpass', async (req: PostReservationRequest, res: Response) => 
 		validateCreateOrChange(pass);
 		validatePost(pass);
 	} catch (err) {
+		console.error('ERROR:', err);
 		const error = err as Error;
 		res
 			.status(400)
@@ -127,6 +128,7 @@ router.post('/smartpass', async (req: PostReservationRequest, res: Response) => 
 		const response = await postHandler(pass);
 		
 		if ((response.result !== 'valid' && response.reject) || (!response.esl && !response.reservation)) {
+			console.error('ERROR:', response);
 			res.status(400).json(response);
 			return;
 		}
@@ -136,7 +138,7 @@ router.post('/smartpass', async (req: PostReservationRequest, res: Response) => 
 		delete response.esl;
 		res.status(200).json(response);
 	} catch (err) {
-		console.error(err); //TODO change to signal logger
+		console.error('ERROR:', err);
 		res.status(500).json({result: 'failed', reject: true, message: 'Internal Server Error'});
 		return;
 	}
@@ -149,7 +151,7 @@ router.delete('/smartpass', async (req: DeleteReservationRequest, res) => {
 		validateOptional(pass);
 		validateDelete(pass);
 	} catch (err) {
-		console.error(err); //TODO change to signal logger
+		console.error('ERROR:', err);
 		res.status(400).json({
 			result: 'invalid',
 			message: (err as Error).message,
