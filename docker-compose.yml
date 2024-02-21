@@ -9,8 +9,12 @@ services:
     build:
       context: ./
       args:
-        - LOCAL_DEPLOYMENT=true
         - NPM_TOKEN
+        - NODE_ENV
+        - reserve_app
+        - reserve_secret
+        - db
+        - tiba_credentials
       dockerfile: Dockerfile
     command: ./node_modules/.bin/nodemon --exec node .
     volumes:

@@ -1,8 +1,8 @@
 #!/bin/bash
 
-if [ "$NODE_ENV" = "local" ]; then
-    NODE_ENV="develop"
-fi
+# if [ "$NODE_ENV" = "local" ]; then
+#     NODE_ENV="develop"
+# fi
 
 # Fetch and process env.NODE_ENV/attache-rest-apps for individual key/value pairs
 ATTACHE_RESTAPI_JSON=$(aws secretsmanager get-secret-value --secret-id "${NODE_ENV}/attache-restapi" --query SecretString --output text)
