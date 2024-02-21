@@ -37,6 +37,8 @@ RUN chmod +x scripts/setup.sh
 COPY .npmrc .npmrc
 # Copy package.json and package-lock.json (or yarn.lock)
 
+RUN echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ./.npmrc
+
 COPY package*.json ./
 # Install dependencies and remove .npmrc
 RUN npm install && rm -f .npmrc
