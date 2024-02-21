@@ -33,6 +33,7 @@ router.post('/', async (req: PostReservationRequest, res: Response) => {
 		delete response.reservation?.description;
 		if (response.result !== 'valid' && response.reject) {
 			res.status(400).json(response);
+			return;
 		}
 		res.status(200).json(response);
 	} catch (err) {
