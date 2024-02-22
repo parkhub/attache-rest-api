@@ -71,3 +71,7 @@ export interface ExternalTransactionSchema {
   uniqueBarcodeEventFlag: boolean;
   externalSourcesLandmarkId?: string | null;
 }
+
+export interface AttacheError extends Error {
+  isAttacheError?: boolean;
+}

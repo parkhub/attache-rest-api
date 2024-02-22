@@ -1,5 +1,5 @@
-'use strict'
+'use strict';
 
-import * as StringUtils from './strings/index'
-import {AWS as AWSUtils} from './aws/index'
-export { StringUtils, AWSUtils }
+import * as StringUtils from './strings/index';
+import {AWS as AWSUtils} from './aws/index';
+export { StringUtils, AWSUtils };
