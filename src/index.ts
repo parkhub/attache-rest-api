@@ -14,5 +14,5 @@ app.use(basicAuth);
 app.use('/api', router);
 
 app.listen(port, () => {
-	console.log(`Server running on port ${port}`);
+	console.log(`Server running on port ${port}, NEW CODE!!`);
 });

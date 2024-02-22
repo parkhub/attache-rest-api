@@ -10,7 +10,7 @@ import {
 } from '../types/reserve';
 import {validateRequired, validateOptional, validateCreateOrChange, validatePost, validatePut, validateDelete} from './reserve/validate';
 import { postHandler } from './reserve/handlers';
-import { Source } from '../types/attache';
+import { AttacheError, Source } from '../types/attache';
 const router = Router();
 
 router.post('/', async (req: PostReservationRequest, res: Response) => {
@@ -140,7 +140,10 @@ router.post('/smartpass', async (req: PostReservationRequest, res: Response) => 
 		res.status(200).json(response);
 	} catch (err) {
 		console.error('ERROR:', err);
-		res.status(500).json({result: 'failed', reject: true, message: 'Internal Server Error'});
+		const incomingError = err as Error as AttacheError;
+		const message = incomingError.isAttacheError ? incomingError.message : 'Internal Server Error';
+		const status = incomingError.isAttacheError ? 400 : 500;
+		res.status(status).json({result: 'failed', reject: true, message: message});
 		return;
 	}
 });
@@ -181,9 +184,11 @@ router.delete('/smartpass', async (req: DeleteReservationRequest, res) => {
 		}
 		res.status(200).json(response);
 	} catch (err) {
-		console.error(err); //TODO change to signal logger
-		res.status(500).json({result: 'failed', reject: true, message: 'Internal Server Error'});
-		return;
+		console.error('ERROR:', err);
+		const incomingError = err as Error as AttacheError;
+		const message = incomingError.isAttacheError ? incomingError.message : 'Internal Server Error';
+		const status = incomingError.isAttacheError ? 400 : 500;
+		res.status(status).json({result: 'failed', reject: true, message: message});
 	}
 });
 export default router;
