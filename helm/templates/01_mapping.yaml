@@ -5,7 +5,7 @@ metadata:
 spec:
   method: POST
   prefix: /api/v1/attache/reserve/smartpass
-  rewrite: /api/reserve
+  rewrite: /api/reserve/smartpass
   service: {{.Values.name}}.{{.Values.namespace}}:{{.Values.port}}
   timeout_ms: 1000000
   cors:
@@ -24,7 +24,7 @@ metadata:
 spec:
   method: OPTIONS
   prefix: /api/v1/attache/reserve/smartpass
-  rewrite: /api/reserve
+  rewrite: /api/reserve/smartpass
   service: {{.Values.name}}.{{.Values.namespace}}:{{.Values.port}}
   timeout_ms: 1000000
   cors:
@@ -43,7 +43,7 @@ metadata:
 spec: 
   method: DELETE
   prefix: /api/v1/attache/reserve/smartpass
-  rewrite: /api/reserve
+  rewrite: /api/reserve/smartpass
   service: {{.Values.name}}.{{.Values.namespace}}:{{.Values.port}}
   timeout_ms: 1000000
   cors:
