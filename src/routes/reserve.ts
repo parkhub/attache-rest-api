@@ -175,6 +175,7 @@ router.delete('/smartpass', async (req: DeleteReservationRequest, res) => {
 			.cancel() as ReserveResponse;		
 		delete response.reservation?.code;
 		delete response.reservation?.description;
+		response.test = true;
 		const {id} = externalTransaction;
 		await dataClient().externalTransaction({id, externalData: {source: Source.tiba}}, undefined, {cancelled: true, cancellationReason: 'transfer'}).updateOne();
 

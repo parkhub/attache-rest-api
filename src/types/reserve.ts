@@ -78,5 +78,6 @@ export interface ReserveResponse {
                 facilityCode?: string;
         };
         externalTransactionId?: {id:string}
+        test?: boolean;
 }
 
