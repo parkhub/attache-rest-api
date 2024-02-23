@@ -12,6 +12,89 @@ import { postHandler } from './reserve/handlers';
 import { AttacheError, Source } from '../types/attache';
 const router = Router();
 
+
+router.post('/smartpass', async (req: PostReservationRequest, res: Response) => {
+	const pass = req.body;
+	try {
+		validateRequired(pass);
+		validateOptional(pass);
+		validateCreateOrChange(pass);
+		validatePost(pass);
+	} catch (err) {
+		console.error('ERROR:', err);
+		const error = err as Error;
+		res
+			.status(400)
+			.json({ result: 'invalid', message: error.message, reject: true });
+		return;
+	}
+	try {
+		const response = await postHandler(pass);
+		
+		if ((response.result !== 'valid' && response.reject) || (!response.esl && !response.reservation)) {
+			console.error('ERROR:', response);
+			res.status(400).json(response);
+			return;
+		}
+
+		delete response.reservation?.code;
+		delete response.reservation?.description;
+		delete response.esl;
+		res.status(200).json(response);
+	} catch (err) {
+		console.error('ERROR:', err);
+		const incomingError = err as Error as AttacheError;
+		const message = incomingError.isAttacheError ? incomingError.message : 'Internal Server Error';
+		const status = incomingError.isAttacheError ? 400 : 500;
+		res.status(status).json({result: 'failed', reject: true, message: message});
+		return;
+	}
+});
+
+router.delete('/smartpass', async (req: DeleteReservationRequest, res) => {
+	const pass = req.body;
+	try {
+		validateRequired(pass);
+		validateOptional(pass);
+		validateDelete(pass);
+	} catch (err) {
+		console.error('ERROR:', err);
+		res.status(400).json({
+			result: 'invalid',
+			message: (err as Error).message,
+			reject: true,
+		});
+		return;
+	}
+	try {
+		const {eventId, lotId, barcode} = pass;
+		const externalTransaction = await dataClient().externalTransaction({eventId, lotId, barcode, redeemed: false, externalData:{source: Source.tiba}}).fetchOne();
+		
+		if (!externalTransaction) return res.status(400).json({result: 'invalid', message: 'no external transaction found', reject: true});
+	
+		const response = await attacheClient()
+			.reserve()
+			.handler({ pass, externalTransaction })
+			.cancel() as ReserveResponse;		
+		delete response.reservation?.code;
+		delete response.reservation?.description;
+		const {id} = externalTransaction;
+		await dataClient().externalTransaction({id, externalData: {source: Source.tiba}}, undefined, {cancelled: true, cancellationReason: 'transfer'}).updateOne();
+
+		if (response.result !== 'cancelled' && response.reject) {
+			res.status(400).json(response);
+			return;
+		}
+		res.status(200).json(response);
+	} catch (err) {
+		console.error('ERROR:', err);
+		const incomingError = err as Error as AttacheError;
+		const message = incomingError.isAttacheError ? incomingError.message : 'Internal Server Error';
+		const status = incomingError.isAttacheError ? 400 : 500;
+		res.status(status).json({result: 'failed', reject: true, message: message});
+	}
+});
+
 // router.post('/', async (req: PostReservationRequest, res: Response) => {
 // 	const pass = req.body;
 
@@ -109,86 +192,5 @@ const router = Router();
 // 	}
 // });
 
-router.post('/smartpass', async (req: PostReservationRequest, res: Response) => {
-	const pass = req.body;
-	try {
-		validateRequired(pass);
-		validateOptional(pass);
-		validateCreateOrChange(pass);
-		validatePost(pass);
-	} catch (err) {
-		console.error('ERROR:', err);
-		const error = err as Error;
-		res
-			.status(400)
-			.json({ result: 'invalid', message: error.message, reject: true });
-		return;
-	}
-	try {
-		const response = await postHandler(pass);
-		
-		if ((response.result !== 'valid' && response.reject) || (!response.esl && !response.reservation)) {
-			console.error('ERROR:', response);
-			res.status(400).json(response);
-			return;
-		}
 
-		delete response.reservation?.code;
-		delete response.reservation?.description;
-		delete response.esl;
-		res.status(200).json(response);
-	} catch (err) {
-		console.error('ERROR:', err);
-		const incomingError = err as Error as AttacheError;
-		const message = incomingError.isAttacheError ? incomingError.message : 'Internal Server Error';
-		const status = incomingError.isAttacheError ? 400 : 500;
-		res.status(status).json({result: 'failed', reject: true, message: message});
-		return;
-	}
-});
-
-router.delete('/smartpass', async (req: DeleteReservationRequest, res) => {
-	const pass = req.body;
-	try {
-		validateRequired(pass);
-		validateOptional(pass);
-		validateDelete(pass);
-	} catch (err) {
-		console.error('ERROR:', err);
-		res.status(400).json({
-			result: 'invalid',
-			message: (err as Error).message,
-			reject: true,
-		});
-		return;
-	}
-	try {
-		const {eventId, lotId, barcode} = pass;
-		const externalTransaction = await dataClient().externalTransaction({eventId, lotId, barcode, redeemed: false, externalData:{source: Source.tiba}}).fetchOne();
-		
-		if (!externalTransaction) return res.status(400).json({result: 'invalid', message: 'no external transaction found', reject: true});
-	
-		const response = await attacheClient()
-			.reserve()
-			.handler({ pass, externalTransaction })
-			.cancel() as ReserveResponse;		
-		delete response.reservation?.code;
-		delete response.reservation?.description;
-		response.test = true;
-		const {id} = externalTransaction;
-		await dataClient().externalTransaction({id, externalData: {source: Source.tiba}}, undefined, {cancelled: true, cancellationReason: 'transfer'}).updateOne();
-
-		if (response.result !== 'cancelled' && response.reject) {
-			res.status(400).json(response);
-			return;
-		}
-		res.status(200).json(response);
-	} catch (err) {
-		console.error('ERROR:', err);
-		const incomingError = err as Error as AttacheError;
-		const message = incomingError.isAttacheError ? incomingError.message : 'Internal Server Error';
-		const status = incomingError.isAttacheError ? 400 : 500;
-		res.status(status).json({result: 'failed', reject: true, message: message});
-	}
-});
 export default router;
