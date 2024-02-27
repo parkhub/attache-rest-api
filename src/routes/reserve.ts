@@ -68,7 +68,7 @@ router.delete('/smartpass', async (req: DeleteReservationRequest, res) => {
 	}
 	try {
 		const {eventId, lotId, barcode} = pass;
-		const externalTransaction = await dataClient().externalTransaction({eventId, lotId, barcode, redeemed: false, externalData:{source: Source.tiba}}).fetchOne();
+		const externalTransaction = await dataClient().externalTransaction({eventId, lotId, barcode, redeemed: false, externalData: {integrationSource: Source.tiba}}).fetchOne();
 		
 		if (!externalTransaction) return res.status(400).json({result: 'invalid', message: 'no external transaction found', reject: true});
 	
@@ -79,7 +79,7 @@ router.delete('/smartpass', async (req: DeleteReservationRequest, res) => {
 		delete response.reservation?.code;
 		delete response.reservation?.description;
 		const {id} = externalTransaction;
-		await dataClient().externalTransaction({id, externalData: {source: Source.tiba}}, undefined, {cancelled: true, cancellationReason: 'transfer'}).updateOne();
+		await dataClient().externalTransaction({id, externalData: {integrationSource: Source.tiba}}, undefined, {cancelled: true, cancellationReason: 'transfer'}).updateOne();
 
 		if (response.result !== 'cancelled' && response.reject) {
 			res.status(400).json(response);

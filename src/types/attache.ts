@@ -43,6 +43,8 @@ export interface ExternalDataSchema {
   rainedOut?: boolean | null;
   orphaned?: boolean | null;
   orderId?: string | null;
+  externalOrderId?: string;
+  integrationSource?: Source;
 }
 
 export interface ExternalTransactionSchema {
