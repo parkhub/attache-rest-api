@@ -37,6 +37,8 @@ router.post('/smartpass', async (req: PostReservationRequest, res: Response) => 
 			return;
 		}
 
+		console.log('ATTACHE RESPONSE', response);
+
 		delete response.reservation?.code;
 		delete response.reservation?.description;
 		delete response.esl;
