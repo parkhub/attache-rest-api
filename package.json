@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "@aws-sdk/client-secrets-manager": "^3.470.0",
-    "@parkhub/attache": "^1.0.43",
+    "@parkhub/attache": "file:../attache/package",
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
@@ -28,8 +28,8 @@
   "modules": "dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc",
-    "start": "./node_modules/.bin/nodemon --exec node .",
+    "build": "npm run clean-dist && tsc",
+    "start": "npm run build && ./node_modules/.bin/nodemon --exec node .",
     "set-env-local": "export NODE_ENV=local && . ./scripts/secrets.sh",
     "compose-up-local": "./scripts/compose.sh",
     "compose-run": "docker-compose run attache-rest-api",

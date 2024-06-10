@@ -9,7 +9,9 @@ import {
 } from '../types/reserve';
 import {validateRequired, validateOptional, validateCreateOrChange, validatePost, validateDelete} from './reserve/validate';
 import { postHandler } from './reserve/handlers';
-import { AttacheError, Source } from '../types/attache';
+import { Internal } from '@parkhub/attache';
+import { AttacheError } from '../types/attache';
+
 const router = Router();
 
 
@@ -36,8 +38,6 @@ router.post('/smartpass', async (req: PostReservationRequest, res: Response) => 
 			res.status(400).json(response);
 			return;
 		}
-
-		console.log('ATTACHE RESPONSE', response);
 
 		delete response.reservation?.code;
 		delete response.reservation?.description;
@@ -70,18 +70,27 @@ router.delete('/smartpass', async (req: DeleteReservationRequest, res) => {
 	}
 	try {
 		const {eventId, lotId, barcode} = pass;
-		const externalTransaction = await dataClient().externalTransaction({eventId, lotId, barcode, redeemed: false, externalData: {integrationSource: Source.tiba}}).fetchOne();
+		const validIntegration = await attacheClient().reserve().pass({pass: pass as unknown as Internal.CancelPassParams}).fetchReservationSource();
+		const externalTransaction = await dataClient().externalTransaction({eventId, lotId, barcode, externalData: {integrationSource: validIntegration.integration}}).fetchOne();
 		
 		if (!externalTransaction) return res.status(400).json({result: 'invalid', message: 'no external transaction found', reject: true});
-	
+		if(externalTransaction.redeemed) return res.status(400).json({result: 'invalid', message: 'redeemed passes cannot be cancelled', reject: true});
 		const response = await attacheClient()
 			.reserve()
-			.handler({ pass, externalTransaction })
+			.pass({ pass: pass as unknown as Internal.CancelPassParams, validIntegration, externalTransaction })
 			.cancel() as ReserveResponse;		
 		delete response.reservation?.code;
 		delete response.reservation?.description;
-		const {id} = externalTransaction;
-		await dataClient().externalTransaction({id, externalData: {integrationSource: Source.tiba}}, undefined, {cancelled: true, cancellationReason: 'transfer'}).updateOne();
+		
+		const {id, transactionId} = externalTransaction;
+		
+		await dataClient().externalTransaction({
+			id, 
+			transactionId,
+			externalData: {integrationSource: validIntegration.integration}}, 
+		undefined, 
+		{cancelled: true, cancellationReason: 'transfer'}
+		).updateOne();
 
 		if (response.result !== 'cancelled' && response.reject) {
 			res.status(400).json(response);
