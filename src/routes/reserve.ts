@@ -75,10 +75,12 @@ router.delete('/smartpass', async (req: DeleteReservationRequest, res) => {
 		
 		if (!externalTransaction) return res.status(400).json({result: 'invalid', message: 'no external transaction found', reject: true});
 		if(externalTransaction.redeemed) return res.status(400).json({result: 'invalid', message: 'redeemed passes cannot be cancelled', reject: true});
+		
 		const response = await attacheClient()
 			.reserve()
 			.pass({ pass: pass as unknown as Internal.CancelPassParams, validIntegration, externalTransaction })
 			.cancel() as ReserveResponse;		
+		
 		delete response.reservation?.code;
 		delete response.reservation?.description;
 		
