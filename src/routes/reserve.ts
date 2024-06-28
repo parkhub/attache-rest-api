@@ -17,6 +17,7 @@ const router = Router();
 
 router.post('/smartpass', async (req: PostReservationRequest, res: Response) => {
 	const pass = req.body;
+
 	try {
 		validateRequired(pass);
 		validateOptional(pass);
@@ -25,11 +26,15 @@ router.post('/smartpass', async (req: PostReservationRequest, res: Response) => 
 	} catch (err) {
 		console.error('ERROR:', err);
 		const error = err as Error;
-		res
-			.status(400)
-			.json({ result: 'invalid', message: error.message, reject: true });
+
+		res.status(400).json({ 
+			result: 'invalid', 
+			message: error.message, 
+			reject: true 
+		});
 		return;
 	}
+
 	try {
 		const response = await postHandler(pass);
 		
@@ -42,12 +47,15 @@ router.post('/smartpass', async (req: PostReservationRequest, res: Response) => 
 		delete response.reservation?.code;
 		delete response.reservation?.description;
 		delete response.esl;
+
 		res.status(200).json(response);
 	} catch (err) {
 		console.error('ERROR:', err);
+		
 		const incomingError = err as Error as AttacheError;
 		const message = incomingError.isAttacheError ? incomingError.message : 'Internal Server Error';
 		const status = incomingError.isAttacheError ? 400 : 500;
+		
 		res.status(status).json({result: 'failed', reject: true, message: message});
 		return;
 	}
@@ -61,6 +69,7 @@ router.delete('/smartpass', async (req: DeleteReservationRequest, res) => {
 		validateDelete(pass);
 	} catch (err) {
 		console.error('ERROR:', err);
+		
 		res.status(400).json({
 			result: 'invalid',
 			message: (err as Error).message,
@@ -68,42 +77,64 @@ router.delete('/smartpass', async (req: DeleteReservationRequest, res) => {
 		});
 		return;
 	}
+
 	try {
 		const {eventId, lotId, barcode} = pass;
 		const validIntegration = await attacheClient().reserve().pass({pass: pass as unknown as Internal.CancelPassParams}).fetchReservationSource();
 		const externalTransaction = await dataClient().externalTransaction({eventId, lotId, barcode, externalData: {integrationSource: validIntegration.integration}}).fetchOne();
 		
-		if (!externalTransaction) return res.status(400).json({result: 'invalid', message: 'no external transaction found', reject: true});
-		if(externalTransaction.redeemed) return res.status(400).json({result: 'invalid', message: 'redeemed passes cannot be cancelled', reject: true});
+		if (!externalTransaction) return res.status(400).json({
+			result: 'invalid', 
+			message: 'no external transaction found', 
+			reject: true
+		});
+
+		if (externalTransaction.redeemed) return res.status(400).json({
+			result: 'invalid', 
+			message: 'redeemed passes cannot be cancelled', 
+			reject: true
+		});
 		
+
 		const response = await attacheClient()
 			.reserve()
-			.pass({ pass: pass as unknown as Internal.CancelPassParams, validIntegration, externalTransaction })
-			.cancel() as ReserveResponse;		
+			.pass({ 
+				pass: pass as unknown as Internal.CancelPassParams, 
+				validIntegration, 
+				externalTransaction 
+			}).cancel() as ReserveResponse;		
+		
+		if (response.result !== 'cancelled' && response.reject) {
+			res.status(400).json(response);
+			return;
+		}
 		
 		delete response.reservation?.code;
 		delete response.reservation?.description;
 		
 		const {id, transactionId} = externalTransaction;
-		
-		await dataClient().externalTransaction({
+
+		const updateConditions = {
 			id, 
 			transactionId,
-			externalData: {integrationSource: validIntegration.integration}}, 
-		undefined, 
-		{cancelled: true, cancellationReason: 'transfer'}
-		).updateOne();
+			externalData: {integrationSource: validIntegration.integration}
+		};
+		const updateData = {
+			cancelled: true, 
+			cancellationReason: 
+			'transfer', 
+			updatedAt: new Date().toISOString()
+		};
 
-		if (response.result !== 'cancelled' && response.reject) {
-			res.status(400).json(response);
-			return;
-		}
+		await dataClient().externalTransaction(updateConditions, undefined, updateData).updateOne();
+
 		res.status(200).json(response);
 	} catch (err) {
 		console.error('ERROR:', err);
 		const incomingError = err as Error as AttacheError;
 		const message = incomingError.isAttacheError ? incomingError.message : 'Internal Server Error';
 		const status = incomingError.isAttacheError ? 400 : 500;
+		
 		res.status(status).json({result: 'failed', reject: true, message: message});
 	}
 });
