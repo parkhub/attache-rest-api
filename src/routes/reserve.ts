@@ -81,7 +81,7 @@ router.delete('/smartpass', async (req: DeleteReservationRequest, res) => {
 	try {
 		const {eventId, lotId, barcode} = pass;
 		const validIntegration = await attacheClient().reserve().pass({pass: pass as unknown as Internal.CancelPassParams}).fetchReservationSource();
-		const externalTransaction = await dataClient().externalTransaction({eventId, lotId, barcode, externalData: {integrationSource: validIntegration.integration}}).fetchOne();
+		const externalTransaction = await dataClient().externalTransaction({eventId, lotId, barcode, externalData: {integrationSource: validIntegration.integration} as Internal.ExternalDataSchema}).fetchOne();
 		
 		if (!externalTransaction) return res.status(400).json({
 			result: 'invalid', 
@@ -94,7 +94,6 @@ router.delete('/smartpass', async (req: DeleteReservationRequest, res) => {
 			message: 'redeemed passes cannot be cancelled', 
 			reject: true
 		});
-		
 
 		const response = await attacheClient()
 			.reserve()
@@ -126,7 +125,7 @@ router.delete('/smartpass', async (req: DeleteReservationRequest, res) => {
 			updatedAt: new Date().toISOString()
 		};
 
-		await dataClient().externalTransaction(updateConditions, undefined, updateData).updateOne();
+		await dataClient().externalTransaction(updateConditions as Partial<Internal.ExternalTransactionSchema>, undefined, updateData).updateOne();
 
 		res.status(200).json(response);
 	} catch (err) {
