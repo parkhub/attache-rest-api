@@ -4,9 +4,10 @@ import { ReservationRequestBody, PostReservationRequestBody, PutReservationReque
 import { StringUtils } from '../../../utils';
 
 const validateRequired = (body: ReservationRequestBody): boolean => {
-	const { landmarkId, lotId } = body;
+	const { landmarkId, lotId, integration } = body;
 	if (!landmarkId) throw new Error('landmarkId is required');
 	if (!lotId) throw new Error('lotId is required');
+	if (!integration) throw new Error('integration is required');
 	if (!StringUtils.isUUID(landmarkId)) throw new Error('landmarkId must be a UUID');
 	if (!StringUtils.isUUID(lotId)) throw new Error('lotId must be a UUID');
 	

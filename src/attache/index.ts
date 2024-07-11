@@ -1,6 +1,6 @@
 'use strict';
 
-import {attache, data, Internal} from '@parkhub/attache';// import { DbClient, UserConfig, VendorCredentials } from '../types/attache';
+import {attache, data, integrations, Internal} from '@parkhub/attache';// import { DbClient, UserConfig, VendorCredentials } from '../types/attache';
 
 const generateConfig = (): Internal.UserConfig => {
 	const dbCredentials: { 
@@ -18,3 +18,4 @@ const generateConfig = (): Internal.UserConfig => {
 
 export const attacheClient = () => attache(generateConfig());
 export const dataClient = () => data(generateConfig());
+export const integrationsClient = () => integrations(generateConfig());

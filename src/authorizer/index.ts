@@ -5,10 +5,9 @@ import { Request, Response, NextFunction } from 'express';
 const basicAuth = (req: Request, res: Response, next: NextFunction) => {
 	// The expected credentials.
 	try {
-		const { headers, path } = req;
-		const route = path.split('/')[2];
-		const APP = `${process.env[`${route.toLowerCase()}_app`]}`;
-		const SECRET = `${process.env[`${route.toLowerCase()}_secret`]}`;
+		const { headers } = req;
+		const APP = `${process.env.reserve_app}`;
+		const SECRET = `${process.env.reserve_secret}`;
 		// Extract the auth header
 		const authHeader = headers.authorization;
 	
