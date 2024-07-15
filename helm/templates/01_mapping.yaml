@@ -54,3 +54,41 @@ spec:
     methods: DELETE
     credentials: true
     headers: {{.Values.headers}}
+---
+apiVersion: getambassador.io/v2
+kind: Mapping
+metadata:
+  name: options-attache-integrations
+spec:
+  method: OPTIONS
+  prefix: /api/v1/attache/integrations
+  rewrite: /api/integrations
+  service: {{.Values.name}}.{{.Values.namespace}}:{{.Values.port}}
+  timeout_ms: 1000000
+  cors:
+    origins:
+      {{- range (splitList "|" .Values.cors) }}
+        - {{.}}
+      {{- end }}
+    methods: OPTIONS,DELETE,PUT,POST,GET
+    credentials: true
+    headers: {{.Values.headers}}
+---
+apiVersion: getambassador.io/v2
+kind: Mapping
+metadata:
+  name: get-attache-integrations
+spec:
+  method: GET
+  prefix: /api/v1/attache/integrations
+  rewrite: /api/integrations
+  service: {{.Values.name}}.{{.Values.namespace}}:{{.Values.port}}
+  timeout_ms: 1000000
+  cors:
+    origins:
+      {{- range (splitList "|" .Values.cors) }}
+        - {{.}}
+      {{- end }}
+    methods: OPTIONS,DELETE,PUT,POST,GET
+    credentials: true
+    headers: {{.Values.headers}}

@@ -1,8 +1,10 @@
 'use strict';
 import { Request } from 'express';
+import { Internal } from '@parkhub/attache';
 export interface ReservationRequestBody {
         landmarkId: string;
         lotId: string;
+        integration: Internal.ValidIntegration
         eventId?: string;
         operatorId?: string;
         transactionId?: string;

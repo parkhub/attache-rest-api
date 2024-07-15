@@ -79,9 +79,8 @@ router.delete('/smartpass', async (req: DeleteReservationRequest, res) => {
 	}
 
 	try {
-		const {eventId, lotId, barcode} = pass;
-		const validIntegration = await attacheClient().reserve().pass({pass: pass as unknown as Internal.CancelPassParams}).fetchReservationSource();
-		const externalTransaction = await dataClient().externalTransaction({eventId, lotId, barcode, externalData: {integrationSource: validIntegration.integration} as Internal.ExternalDataSchema}).fetchOne();
+		const {eventId, lotId, barcode, integration} = pass;
+		const externalTransaction = await dataClient().externalTransaction({eventId, lotId, barcode, externalData: {integrationSource: integration.source} as Internal.ExternalDataSchema}).fetchOne();
 		
 		if (!externalTransaction) return res.status(400).json({
 			result: 'invalid', 
@@ -99,7 +98,7 @@ router.delete('/smartpass', async (req: DeleteReservationRequest, res) => {
 			.reserve()
 			.pass({ 
 				pass: pass as unknown as Internal.CancelPassParams, 
-				validIntegration, 
+				validIntegration: integration, 
 				externalTransaction 
 			}).cancel() as ReserveResponse;		
 		
@@ -116,7 +115,7 @@ router.delete('/smartpass', async (req: DeleteReservationRequest, res) => {
 		const updateConditions = {
 			id, 
 			transactionId,
-			externalData: {integrationSource: validIntegration.integration}
+			externalData: {integrationSource: integration.source}
 		};
 		const updateData = {
 			cancelled: true, 
