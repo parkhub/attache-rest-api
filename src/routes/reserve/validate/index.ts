@@ -5,6 +5,7 @@ import { StringUtils } from '../../../utils';
 
 const validateRequired = (body: ReservationRequestBody): boolean => {
 	const { landmarkId, lotId, integration } = body;
+	
 	if (!landmarkId) throw new Error('landmarkId is required');
 	if (!lotId) throw new Error('lotId is required');
 	if (!integration) throw new Error('integration is required');
@@ -16,6 +17,7 @@ const validateRequired = (body: ReservationRequestBody): boolean => {
 
 const validateOptional = (body: ReservationRequestBody): boolean => {
 	const { operatorId, licensePlate, eventId, transactionId } = body;
+
 	if (eventId && !StringUtils.isUUID(eventId)) throw new Error('eventId must be a UUID');
 	if (licensePlate && typeof licensePlate !== 'string') throw new Error('licensePlate must be a string');
 	if (operatorId && !StringUtils.isUUID(operatorId)) throw new Error('operatorId must be a UUID');
@@ -54,8 +56,10 @@ const validateCreateOrChange = (body: CreateOrChangeReservationRequestBody): boo
 
 const validateDelete = (body: DeleteReservationRequestBody): boolean => {
 	const { barcode } = body;
+	
 	if (!barcode) throw new Error('barcode is required');
 	if (typeof barcode !== 'string') throw new Error('barcode must be a string');
+	
 	return true;
 };
 
