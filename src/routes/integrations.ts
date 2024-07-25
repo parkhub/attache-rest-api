@@ -55,6 +55,14 @@ router.get('/', async (req: GetIntegrationsRequest, res: Response) => {
 		const message = incomingError.isAttacheError ? incomingError.message : 'Internal Server Error';
 		const status = incomingError.isAttacheError ? 400 : 500;
 		const errorKey = incomingError.isAttacheError ? 'package-error' : 'internal-error';
+
+		if(incomingError.message === 'No valid integrations found') {
+			// this would only happen if there were no valid configured attache supported integrations
+			// would want to log the error but not return a 400 in this case
+			logger.error({ message: 'No valid integrations found', queryStringParameters: req.query }, 'no-valid-integrations');
+			res.status(200).json({integrations: []});
+			return;
+		}
 		
 		logger.error({ message, error: err, queryStringParameters: req.query }, errorKey);
 		res.status(status).json({result: 'failed', reject: true, message: message});
