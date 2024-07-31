@@ -24,6 +24,7 @@ router.get('/', async (req: GetIntegrationsRequest, res: Response) => {
 		return;
 	}
 	try {
+		delete req.query.eventId;
 		validateGet(req.query as IntegrationsQueryParams);
 	} catch(err) {
 		const error = err as Error;		
