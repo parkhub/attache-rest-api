@@ -13,14 +13,15 @@ export interface ReservationRequestBody {
 
 export interface CreateOrChangeReservationRequestBody {
     total?: number;
-    startsAt: string;
     expiresAt?: string;
 }
 export interface PostReservationRequestBody extends CreateOrChangeReservationRequestBody, ReservationRequestBody {
+    startsAt: string;
     barcode?: string;
 }
 export interface PutReservationRequestBody extends CreateOrChangeReservationRequestBody, ReservationRequestBody {
     barcode: string;
+    startsAt?: string;
 }
 
 export interface DeleteReservationRequestBody extends ReservationRequestBody {

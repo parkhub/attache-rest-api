@@ -29,28 +29,27 @@ const validateOptional = (body: ReservationRequestBody): boolean => {
 };
 
 const validatePost = (body: PostReservationRequestBody): boolean => {
-	const { barcode } = body;
+	const { barcode, startsAt } = body;
 	
 	if (barcode && typeof barcode !== 'string') throw new Error('barcode must be a string');
+	if (!startsAt) throw new Error('startsAt is required');
+	if (!TimeUtils.isUTC(startsAt)) throw new Error('startsAt must be a valid UTC date string');
 	
 	return true;
 };
 
 const validatePut = (body: PutReservationRequestBody): boolean => {
-	const { barcode } = body;
+	const { barcode, startsAt } = body;
 
 	if (!barcode) throw new Error('barcode is required');
 	if (typeof barcode !== 'string') throw new Error('barcode must be a string');
-
+	if (startsAt && !TimeUtils.isUTC(startsAt)) throw new Error('startsAt must be a valid UTC date string');
 	
 	return true;
 };
 
 const validateCreateOrChange = (body: CreateOrChangeReservationRequestBody): boolean => {
-	const {startsAt, total, expiresAt } = body;
-	
-	if (!startsAt) throw new Error('startsAt is required');
-	if (!TimeUtils.isUTC(startsAt)) throw new Error('startsAt must be a valid UTC date string');
+	const {total, expiresAt } = body;
 	if (expiresAt && !TimeUtils.isUTC(expiresAt)) throw new Error('expiresAt must be a valid UTC date string');
 	if (total && typeof total !== 'number') throw new Error('total must be a number');
 
