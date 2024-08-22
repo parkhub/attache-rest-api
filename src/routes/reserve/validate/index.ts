@@ -1,7 +1,8 @@
 'use strict';
 
+import { Enums } from '@parkhub/attache';
 import { ReservationRequestBody, PostReservationRequestBody, PutReservationRequestBody, CreateOrChangeReservationRequestBody, DeleteReservationRequestBody } from '../../../types/reserve';
-import { StringUtils } from '../../../utils';
+import { StringUtils, TimeUtils } from '../../../utils';
 
 const validateRequired = (body: ReservationRequestBody): boolean => {
 	const { landmarkId, lotId, integration } = body;
@@ -11,6 +12,7 @@ const validateRequired = (body: ReservationRequestBody): boolean => {
 	if (!integration) throw new Error('integration is required');
 	if (!StringUtils.isUUID(landmarkId)) throw new Error('landmarkId must be a UUID');
 	if (!StringUtils.isUUID(lotId)) throw new Error('lotId must be a UUID');
+	if (integration.flow !== Enums.TransactionFlow.reserve) throw new Error('integration not supported for the reservation flow');
 	
 	return true;
 };
@@ -35,10 +37,11 @@ const validatePost = (body: PostReservationRequestBody): boolean => {
 };
 
 const validatePut = (body: PutReservationRequestBody): boolean => {
-	const {barcode } = body;
+	const { barcode } = body;
 
 	if (!barcode) throw new Error('barcode is required');
 	if (typeof barcode !== 'string') throw new Error('barcode must be a string');
+
 	
 	return true;
 };
@@ -47,9 +50,9 @@ const validateCreateOrChange = (body: CreateOrChangeReservationRequestBody): boo
 	const {startsAt, total, expiresAt } = body;
 	
 	if (!startsAt) throw new Error('startsAt is required');
-	if (!StringUtils.isUTC(startsAt)) throw new Error('startsAt must be a valid UTC date string');
+	if (!TimeUtils.isUTC(startsAt)) throw new Error('startsAt must be a valid UTC date string');
+	if (expiresAt && !TimeUtils.isUTC(expiresAt)) throw new Error('expiresAt must be a valid UTC date string');
 	if (total && typeof total !== 'number') throw new Error('total must be a number');
-	if (expiresAt && !StringUtils.isUTC(expiresAt)) throw new Error('expiresAt must be a valid UTC date string');
 
 	return true;
 };

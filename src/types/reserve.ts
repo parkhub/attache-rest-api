@@ -19,7 +19,6 @@ export interface CreateOrChangeReservationRequestBody {
 export interface PostReservationRequestBody extends CreateOrChangeReservationRequestBody, ReservationRequestBody {
     barcode?: string;
 }
-
 export interface PutReservationRequestBody extends CreateOrChangeReservationRequestBody, ReservationRequestBody {
     barcode: string;
 }
