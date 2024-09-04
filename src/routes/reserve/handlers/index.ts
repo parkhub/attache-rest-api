@@ -12,7 +12,7 @@ export const postHandler = async(data: PostReservationRequestBody): Promise<Rese
 		.handler({pass: {lotId, landmarkId, startsAt, expiresAt, eventId, licensePlate, operatorId, transactionId}, integration})
 		.create();
 
-	return response;
+	return response as ReserveResponse;
 };
 
 export const putHandler = async (data: PutReservationRequestBody, externalTransaction: Internal.ExternalTransactionSchema): Promise<ReserveResponse> => {
@@ -42,5 +42,5 @@ export const putHandler = async (data: PutReservationRequestBody, externalTransa
 		})
 		.update();
 
-	return response;
+	return response as ReserveResponse;
 };

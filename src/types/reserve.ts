@@ -1,6 +1,7 @@
 'use strict';
 import { Request } from 'express';
 import { Internal } from '@parkhub/attache';
+import { GenericErrorMessage, ReserveErrorMessage, ReserveMessage } from '../enums/responses';
 export interface ReservationRequestBody {
         landmarkId: string;
         lotId: string;
@@ -63,9 +64,11 @@ export interface ExternalSourcesLandmarkSchema {
     updatedAt?: string | null;
     source?: string | null;
   }
+
+type Message = GenericErrorMessage | ReserveMessage | ReserveErrorMessage
 export interface ReserveResponse {
         result: Result;
-        message?: string;
+        message?: Message;
         barcode?: { text: string, type: string };
         esl?: ExternalSourcesLandmarkSchema;
         reject: boolean;
@@ -83,3 +86,7 @@ export interface ReserveResponse {
         test?: boolean;
 }
 
+export interface ReserveErrorResponse extends ReserveResponse {
+    message: GenericErrorMessage | ReserveErrorMessage;
+    reject: true;
+}

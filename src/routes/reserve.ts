@@ -13,6 +13,8 @@ import { postHandler, putHandler } from './reserve/handlers';
 import { Internal } from '@parkhub/attache';
 import { AttacheError } from '../types/attache';
 import { Logger } from '../utils';
+import { GenericErrorMessage, ReserveErrorMessage, ReserveMessage } from '../enums/responses';
+import { decryptLicenseHash } from '../utils/strings';
 
 const router = Router();
 
@@ -69,15 +71,15 @@ router.post('/smartpass', async (req: PostReservationRequest, res: Response) => 
 		delete response.esl;
 
 		logger.log({
-			message: 'Smartpass Reservation Created', 
+			message: ReserveMessage.CREATE_SMARTPASS_SUCCESS, 
 			response, 
 			payload: req.body
 		});
 
-		res.status(200).json(response);
+		res.status(200).json({message: ReserveMessage.CREATE_SMARTPASS_SUCCESS, ...response});
 	} catch (err) {		
 		const incomingError = err as Error as AttacheError;
-		const message = incomingError.isAttacheError ? incomingError.message : 'Internal Server Error';
+		const message = incomingError.isAttacheError ? GenericErrorMessage.ATTACHE_ERROR : GenericErrorMessage.INTERNAL_SERVER_ERROR;
 		const status = incomingError.isAttacheError ? 400 : 500;
 		const errorKey = incomingError.isAttacheError ? 'package-error' : 'internal-error';
 		
@@ -124,12 +126,18 @@ router.put('/smartpass', async (req: PutReservationRequest, res: Response) => {
 
 	try {
 		const {eventId, lotId, barcode, integration} = pass;
-		const externalTransaction = await dataClient().externalTransaction({eventId, lotId, barcode, externalData: {integrationSource: integration.source} as Internal.ExternalDataSchema}).fetchOne();
+	
+		//TODO update attache schema with license plate col for ext transaction then remove this line
+		interface ExtTransactionWLP extends Internal.ExternalTransactionSchema {
+			licensePlate: string;
+		}
+
+		const externalTransaction = await dataClient().externalTransaction({eventId, lotId, barcode, externalData: {integrationSource: integration.source} as Internal.ExternalDataSchema}).fetchOne() as ExtTransactionWLP;
 		
 		if (!externalTransaction) {
 			const error = {
 				result: 'invalid', 
-				message: 'no external transaction found', 
+				message: GenericErrorMessage.EXTERNAL_TRANSACTION_NOT_FOUND, 
 				reject: true
 			};
 
@@ -141,15 +149,15 @@ router.put('/smartpass', async (req: PutReservationRequest, res: Response) => {
 			return res.status(400).json(error);
 		}
 
-		if (externalTransaction.redeemed) {
+		if (externalTransaction.redeemed && decryptLicenseHash(externalTransaction.licensePlate) !== pass.licensePlate) {
 			const error = {
 				result: 'invalid', 
-				message: 'redeemed passes cannot be cancelled', 
+				message: ReserveErrorMessage.REDEEMED_LICENSE_PLATE_ERROR,
 				reject: true
 			};
 
 			logger.error({
-				message: error.message, 
+				message: ReserveErrorMessage.REDEEMED_LICENSE_PLATE_ERROR, 
 				error, 
 				payload: req.body
 			}, 'reservation-update-failed');
@@ -160,11 +168,11 @@ router.put('/smartpass', async (req: PutReservationRequest, res: Response) => {
 		
 		if ((response.result !== 'valid' && response.reject) || (!response.esl && !response.reservation)) {
 			logger.error({
-				message: 'Reservation update failed', 
+				message: ReserveErrorMessage.UPDATE_SMARTPASS_FAILED, 
 				error: response, 
 				payload: req.body
 			}, 'reservation-failed');
-			res.status(400).json(response);
+			res.status(400).json({ message: ReserveErrorMessage.UPDATE_SMARTPASS_FAILED, ...response });
 			return;
 		}
 
@@ -182,7 +190,7 @@ router.put('/smartpass', async (req: PutReservationRequest, res: Response) => {
 
 	} catch (err) {		
 		const incomingError = err as Error as AttacheError;
-		const message = incomingError.isAttacheError ? incomingError.message : 'Internal Server Error';
+		const message = incomingError.isAttacheError ? GenericErrorMessage.ATTACHE_ERROR : GenericErrorMessage.INTERNAL_SERVER_ERROR;
 		const status = incomingError.isAttacheError ? 400 : 500;
 		const errorKey = incomingError.isAttacheError ? 'package-error' : 'internal-error';
 	
@@ -232,7 +240,7 @@ router.delete('/smartpass', async (req: DeleteReservationRequest, res) => {
 		if (!externalTransaction) {
 			const error = {
 				result: 'invalid', 
-				message: 'no external transaction found', 
+				message: GenericErrorMessage.EXTERNAL_TRANSACTION_NOT_FOUND, 
 				reject: true
 			};
 
@@ -248,7 +256,7 @@ router.delete('/smartpass', async (req: DeleteReservationRequest, res) => {
 		if (externalTransaction.redeemed) {
 			const error = {
 				result: 'invalid', 
-				message: 'redeemed passes cannot be cancelled', 
+				message: ReserveErrorMessage.REDEEMED_CANCEL_PASS_ERROR,
 				reject: true
 			};
 
