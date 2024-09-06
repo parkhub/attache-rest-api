@@ -5,6 +5,7 @@ import { GetIntegrationsRequest, IntegrationsQueryParams } from '../types/integr
 import { validateGet } from './integrations/validate';
 import { AttacheError } from '../types/attache';
 import { Logger } from '../utils/logger';
+import { IntegrationErrorMessage } from '../enums/responses';
 
 const router = Router();
 
@@ -40,9 +41,9 @@ router.get('/', async (req: GetIntegrationsRequest, res: Response) => {
 		return;
 	}
 	try {
-		const { eventId, lotId, landmarkId, client } = req.query as IntegrationsQueryParams;
+		const { lotId, landmarkId, client } = req.query as IntegrationsQueryParams;
     
-		const integrations = await integrationsClient().fetchHandler({lotId, landmarkId, eventId}).all();
+		const integrations = await integrationsClient().fetchHandler({lotId, landmarkId}).all();
 
 		logger.log({
 			message: `Valid integrations found for landmark: ${landmarkId}`, 
@@ -57,10 +58,10 @@ router.get('/', async (req: GetIntegrationsRequest, res: Response) => {
 		const status = incomingError.isAttacheError ? 400 : 500;
 		const errorKey = incomingError.isAttacheError ? 'package-error' : 'internal-error';
 
-		if(incomingError.message === 'No valid integrations found') {
+		if(incomingError.message === IntegrationErrorMessage.NO_VALID_INTEGRATIONS) {
 			// this would only happen if there were no valid configured attache supported integrations
 			// would want to log the error but not return a 400 in this case
-			logger.error({ message: 'No valid integrations found', queryStringParameters: req.query }, 'no-valid-integrations');
+			logger.error({ message: incomingError.message, queryStringParameters: req.query }, 'no-valid-integrations');
 			res.status(200).json({integrations: []});
 			return;
 		}
