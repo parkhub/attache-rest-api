@@ -10,9 +10,14 @@ const generateConfig = (): Internal.UserConfig => {
 	//todo add for other gate validations as they get built
 	const tibaCredentials = JSON.parse(process.env.tiba_credentials as string) as Internal.VendorCredentials['tiba'];
 	const skidataCredentials = JSON.parse(process.env.skidata_credentials as string) as Internal.VendorCredentials['skidata'];
+	const amanoCredentials = JSON.parse(process.env.amano_credentials as string) as Internal.VendorCredentials['amano'];
 	return {
 		database: dbCredentials,
-		vendorCredentials: { tiba: tibaCredentials, skidata: skidataCredentials }
+		vendorCredentials: { 
+			tiba: tibaCredentials, 
+			skidata: skidataCredentials, 
+			amano: amanoCredentials 
+		}
 	};
 };
 

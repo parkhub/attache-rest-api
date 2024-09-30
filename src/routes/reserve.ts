@@ -215,6 +215,8 @@ router.delete('/smartpass', async (req: DeleteReservationRequest, res) => {
 		endpoint: '/reserve/smartpass', 
 		method: 'DELETE'
 	});
+
+	console.log(pass.integration.source);
 	try {
 		validateRequired(pass);
 		validateOptional(pass);

@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "@aws-sdk/client-secrets-manager": "^3.470.0",
-    "@parkhub/attache": "^1.0.46",
+    "@parkhub/attache": "^2.0.0",
     "@parkhub/node-signal-client": "^1.1.0",
     "@types/luxon": "^3.4.2",
     "axios": "^1.7.2",
