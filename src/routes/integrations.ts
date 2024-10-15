@@ -63,7 +63,7 @@ router.get('/', async (req: GetIntegrationsRequest, res: Response) => {
 		if(incomingError.message === IntegrationErrorMessage.NO_VALID_INTEGRATIONS) {
 			// this would only happen if there were no valid configured attache supported integrations
 			// would want to log the error but not return a 400 in this case
-			logger.error({ message: incomingError.message, queryStringParameters: req.query }, 'no-valid-integrations');
+			logger.log({ message: incomingError.message, queryStringParameters: req.query });
 			res.status(200).json({integrations: []});
 			return;
 		}
