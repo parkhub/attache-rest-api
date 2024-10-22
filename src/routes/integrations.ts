@@ -10,14 +10,16 @@ import { IntegrationErrorMessage } from '../enums/responses';
 const router = Router();
 
 router.get('/', async (req: GetIntegrationsRequest, res: Response) => {
-	const logger = new Logger({
+	const logSettings = {
 		client: 'loggly',
 		name: 'get-integrations',
 		description: 'fetch valid integrations for a given lot and landmark',
 		tags: ['integrations'],
 		endpoint: '/integrations', 
 		method: 'GET'
-	});
+	};
+	
+	const logger = new Logger(logSettings);
 
 	if (!req.query) {
 		logger.error('No query parameters provided', 'bad-request');
@@ -43,7 +45,7 @@ router.get('/', async (req: GetIntegrationsRequest, res: Response) => {
 	try {
 		const { lotId, landmarkId, client } = req.query as IntegrationsQueryParams;
     
-		const integrations = await integrationsClient().fetchHandler({lotId, landmarkId}).all();
+		const integrations = await integrationsClient(logSettings).fetchHandler({lotId, landmarkId}).all();
 
 		logger.log({
 			message: `Valid integrations found for landmark: ${landmarkId}`, 
@@ -61,7 +63,7 @@ router.get('/', async (req: GetIntegrationsRequest, res: Response) => {
 		if(incomingError.message === IntegrationErrorMessage.NO_VALID_INTEGRATIONS) {
 			// this would only happen if there were no valid configured attache supported integrations
 			// would want to log the error but not return a 400 in this case
-			logger.error({ message: incomingError.message, queryStringParameters: req.query }, 'no-valid-integrations');
+			logger.log({ message: incomingError.message, queryStringParameters: req.query, isError: false });
 			res.status(200).json({integrations: []});
 			return;
 		}

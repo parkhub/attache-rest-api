@@ -7,6 +7,7 @@ import { request } from '../request';
 import Loggly from 'loggly';
 import { AxiosHeaders } from 'axios';
 import { Content } from '../../types';
+
 const Signal = require('@parkhub/node-signal-client').default;
 
 const slack = (settings: Logger, output: object) => {
