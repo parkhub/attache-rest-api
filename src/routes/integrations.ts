@@ -58,6 +58,8 @@ router.get('/', async (req: GetIntegrationsRequest, res: Response) => {
 		const incomingError = err as Error as AttacheError;
 		const message = incomingError.isAttacheError ? incomingError.message : 'Internal Server Error';
 		const status = incomingError.isAttacheError ? 400 : 500;
+		// TODO remove once attache version is updated
+		if(message === 'Unsupported table'){ res.status(200).json({integrations: []}); return;}
 		const errorKey = incomingError.isAttacheError ? 'package-error' : 'internal-error';
 
 		if(incomingError.message === IntegrationErrorMessage.NO_VALID_INTEGRATIONS) {
