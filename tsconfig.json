@@ -8,6 +8,7 @@
     "strict": true,
     "esModuleInterop": true,
     "moduleResolution": "Node",
+    "skipLibCheck": true
   },
   "include": ["src/**/*", ".eslintrc.js"],
   "exclude": ["node_modules/**/*"]

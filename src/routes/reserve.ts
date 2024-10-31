@@ -10,7 +10,7 @@ import {
 } from '../types/reserve';
 import {validateRequired, validateOptional, validateCreateOrChange, validatePost, validateDelete, validatePut} from './reserve/validate';
 import { postHandler, putHandler } from './reserve/handlers';
-import { Internal } from '@parkhub/attache';
+import { Enums, Internal } from '@parkhub/attache';
 import { AttacheError } from '../types/attache';
 import { Logger } from '../utils';
 import { GenericErrorMessage, ReserveErrorMessage, ReserveMessage } from '../enums/responses';
@@ -20,14 +20,15 @@ const router = Router();
 
 
 router.post('/smartpass', async (req: PostReservationRequest, res: Response) => {
-	const logger = new Logger({
+	const logSettings = {
 		client: 'loggly',
 		name: 'post-reserve-smartpass',
 		description: 'creates external gate reservation for smartpass',
 		tags: ['reserve', 'smartpass'],
 		endpoint: '/reserve/smartpass', 
 		method: 'POST'
-	});
+	};
+	const logger = new Logger(logSettings);
 
 	const pass = req.body;
 
@@ -54,7 +55,7 @@ router.post('/smartpass', async (req: PostReservationRequest, res: Response) => 
 	}
 
 	try {
-		const response = await postHandler(pass);
+		const response = await postHandler(pass, logSettings);
 		
 		if ((response.result !== 'valid' && response.reject) || (!response.esl && !response.reservation)) {
 			logger.error({
@@ -95,14 +96,16 @@ router.post('/smartpass', async (req: PostReservationRequest, res: Response) => 
 });
 
 router.put('/smartpass', async (req: PutReservationRequest, res: Response) => {
-	const logger = new Logger({
+	const logSettings = {
 		client: 'loggly',
 		name: 'put-reserve-smartpass',
 		description: 'updates external gate reservation for smartpass',
 		tags: ['reserve', 'smartpass'],
 		endpoint: '/reserve/smartpass', 
 		method: 'PUT'
-	});
+	};
+
+	const logger = new Logger(logSettings);
 
 	const pass = req.body;
 
@@ -132,7 +135,7 @@ router.put('/smartpass', async (req: PutReservationRequest, res: Response) => {
 			licensePlate: string;
 		}
 
-		const externalTransaction = await dataClient().externalTransaction({eventId, lotId, barcode, externalData: {integrationSource: integration.source} as Internal.ExternalDataSchema}).fetchOne() as ExtTransactionWLP;
+		const externalTransaction = await dataClient(logSettings).externalTransaction({eventId, lotId, barcode, externalData: {integrationSource: integration.source} as Internal.ExternalDataSchema}).fetchOne() as ExtTransactionWLP;
 		
 		if (!externalTransaction) {
 			const error = {
@@ -164,7 +167,7 @@ router.put('/smartpass', async (req: PutReservationRequest, res: Response) => {
 			return res.status(400).json(error);
 		}
 
-		const response = await putHandler(pass, externalTransaction);
+		const response = await putHandler(pass, externalTransaction, logSettings);
 		
 		if ((response.result !== 'valid' && response.reject) || (!response.esl && !response.reservation)) {
 			logger.error({
@@ -207,14 +210,17 @@ router.put('/smartpass', async (req: PutReservationRequest, res: Response) => {
 
 router.delete('/smartpass', async (req: DeleteReservationRequest, res) => {
 	const pass = req.body;
-	const logger = new Logger({
+	const logSettings = {
 		client: 'loggly',
 		name: 'delete-reserve-smartpass',
 		description: 'deletes external gate reservation for smartpass and cancels external transaction',
 		tags: ['reserve', 'smartpass'],
 		endpoint: '/reserve/smartpass', 
 		method: 'DELETE'
-	});
+	};
+
+	const logger = new Logger(logSettings);
+
 	try {
 		validateRequired(pass);
 		validateOptional(pass);
@@ -235,7 +241,7 @@ router.delete('/smartpass', async (req: DeleteReservationRequest, res) => {
 
 	try {
 		const {eventId, lotId, barcode, integration} = pass;
-		const externalTransaction = await dataClient().externalTransaction({eventId, lotId, barcode, externalData: {integrationSource: integration.source} as Internal.ExternalDataSchema}).fetchOne();
+		const externalTransaction = await dataClient(logSettings).externalTransaction({eventId, lotId, barcode, externalData: {integrationSource: integration.source} as Internal.ExternalDataSchema}).fetchOne();
 		
 		if (!externalTransaction) {
 			const error = {
@@ -268,7 +274,21 @@ router.delete('/smartpass', async (req: DeleteReservationRequest, res) => {
 			return res.status(400).json(error);
 		}
 
-		const response = await attacheClient()
+		if(integration.source === 'amano') {
+			const {ev} = integration;
+			const externalValidation = ev as Partial<Internal.ExternalValidationSchema>;
+	
+			const result = await dataClient(logSettings).externalValidation({id: externalValidation.id}, Enums.ExternalValidationType.amano, ['externalId']).fetchOneById();
+	
+			if(!result) {
+				throw new Error('Invalid external validation');
+			}
+		
+			externalValidation.externalId = result.externalId;
+			integration.ev = externalValidation;
+		}
+		
+		const response = await attacheClient(logSettings)
 			.reserve()
 			.pass({ 
 				pass: pass as unknown as Internal.CancelPassParams, 
@@ -305,7 +325,7 @@ router.delete('/smartpass', async (req: DeleteReservationRequest, res) => {
 			updatedAt: new Date().toISOString()
 		};
 
-		await dataClient().externalTransaction(updateConditions as Partial<Internal.ExternalTransactionSchema>, undefined, updateData).updateOne();
+		await dataClient(logSettings).externalTransaction(updateConditions as Partial<Internal.ExternalTransactionSchema>, undefined, updateData).updateOne();
 		
 		logger.log({
 			message: 'Smartpass Reservation Cancelled Successfully', 
